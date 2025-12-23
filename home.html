@@ -2,76 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - ART GAME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; background: #2d1e12; font-family: sans-serif; color: #fff; }
-        .header { background: #1a0b00; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #d4af37; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #d4af37; }
-        .coins { background: #3e2723; padding: 5px 15px; border-radius: 20px; color: #ffd700; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
-        .card { background: linear-gradient(45deg, #3e2723, #5d4037); padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #8d6e63; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-        .card:active { transform: scale(0.95); }
-        .card h3 { margin: 10px 0 0; color: #ffcc80; }
-        .card-lg { grid-column: span 2; background: linear-gradient(45deg, #b71c1c, #d32f2f); border-color: #ff5252; }
-        .icon { font-size: 40px; }
-        .footer { position: fixed; bottom: 0; width: 100%; background: #1a0b00; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid #d4af37; }
-        .nav-item { text-align: center; color: #8d6e63; font-size: 12px; cursor: pointer; }
-        .nav-item.active { color: #d4af37; }
-        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+        body { background: #0f0f12; color: #fff; font-family: 'Poppins', sans-serif; margin: 0; padding-bottom: 80px; }
+        /* ... Previous CSS remains same ... */
+        .header { padding: 20px; background: linear-gradient(180deg, #1a1a20 0%, rgba(26,26,32,0) 100%); display: flex; justify-content: space-between; align-items: center; }
+        .user-block { display: flex; align-items: center; gap: 15px; }
+        .avatar { width: 55px; height: 55px; border-radius: 15px; border: 2px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); object-fit: cover; }
+        .name-box h3 { margin: 0; font-family: 'Orbitron', sans-serif; font-size: 18px; }
+        .score-badge { background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; color: #ffd700; padding: 5px 15px; border-radius: 20px; font-weight: bold; }
+        
+        .hero-banner { margin: 20px; padding: 30px; border-radius: 20px; background: linear-gradient(135deg, #b00020, #55000f); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(176, 0, 32, 0.3); cursor: pointer; }
+        .hero-banner h1 { font-family: 'Orbitron'; margin: 0; font-size: 28px; z-index: 2; position: relative; }
+        
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 20px; }
+        .card { background: #1e1e24; border-radius: 20px; padding: 20px; text-align: center; border: 1px solid #2a2a35; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: 0.2s; }
+        .card:active { transform: scale(0.95); background: #25252d; }
+        .icon-bg { width: 50px; height: 50px; margin: 0 auto 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        
+        .c-offline .icon-bg { background: rgba(0, 255, 255, 0.1); color: #00ffff; box-shadow: 0 0 15px rgba(0,255,255,0.2); }
+        .c-friends .icon-bg { background: rgba(0, 255, 100, 0.1); color: #00ff66; box-shadow: 0 0 15px rgba(0,255,100,0.2); }
+        .c-invite .icon-bg { background: rgba(255, 0, 255, 0.1); color: #ff00ff; box-shadow: 0 0 15px rgba(255,0,255,0.2); }
+        
+        .nav-bar { position: fixed; bottom: 0; width: 100%; background: #1a1a20; display: flex; justify-content: space-around; padding: 15px 0; border-top: 1px solid #2a2a35; border-radius: 20px 20px 0 0; backdrop-filter: blur(10px); }
+        .nav-item { color: #555; font-size: 24px; }
+        .nav-item.active { color: #ffd700; }
+
+        /* Invite Popup */
+        #invite-modal { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(0,0,0,0.9); border: 2px solid #ffd700; padding: 20px; border-radius: 15px; z-index: 1000; display: none; box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); animation: slideDown 0.5s ease; }
+        @keyframes slideDown { from {top:-100px} to {top:20px} }
+        .inv-btn { padding: 10px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="user-info">
+    <div class="user-block">
         <img src="" id="u-img" class="avatar">
-        <div>
-            <div id="u-name" style="font-weight:bold">Loading...</div>
-            <div id="u-user" style="font-size:12px; color:#aaa">...</div>
+        <div class="name-box">
+            <h3 id="u-name">...</h3>
+            <span id="u-user">@...</span>
         </div>
     </div>
-    <div class="coins">🏆 <span id="u-score">0</span></div>
+    <div class="score-badge">🏆 <span id="u-score">0</span></div>
+</div>
+
+<div class="hero-banner" onclick="location.href='game.html?mode=online'">
+    <h1>ONLINE DUEL</h1>
+    <p>Ranked Match Making</p>
 </div>
 
 <div class="grid">
-    <div class="card card-lg" onclick="playGame('online')">
-        <div class="icon">🌍</div>
-        <h3>PLAY ONLINE</h3>
-        <small>Random Match • Win Score</small>
+    <div class="card c-offline" onclick="location.href='game.html?mode=offline'">
+        <div class="icon-bg">🤖</div>
+        <h4>OFFLINE</h4>
     </div>
-    
-    <div class="card" onclick="playGame('offline')">
-        <div class="icon">🤖</div>
-        <h3>OFFLINE</h3>
-        <small>Vs Bot / 2P</small>
+    <div class="card c-invite" onclick="location.href='invite.html'">
+        <div class="icon-bg">⚔️</div>
+        <h4>HOST GAME</h4>
     </div>
-
-    <div class="card" onclick="location.href='invite.html'">
-        <div class="icon">⚔️</div>
-        <h3>INVITE</h3>
-        <small>Play w/ Friends</small>
-    </div>
-
-    <div class="card" style="background:#1b5e20" onclick="location.href='leaderboard.html'">
-        <div class="icon">📊</div>
-        <h3>RANKING</h3>
-        <small>Top 10</small>
+    <!-- New Friends Button -->
+    <div class="card c-friends" style="grid-column: span 2" onclick="location.href='friends.html'">
+        <div class="icon-bg">👥</div>
+        <h4>MY FRIENDS</h4>
+        <small style="color:#aaa">Add & Manage Friends</small>
     </div>
 </div>
 
-<div class="footer">
-    <div class="nav-item active">
-        <span class="nav-icon">🏠</span>Home
-    </div>
-    <div class="nav-item" onclick="location.href='leaderboard.html'">
-        <span class="nav-icon">🏆</span>Rank
-    </div>
-    <div class="nav-item" onclick="location.href='profile.html'">
-        <span class="nav-icon">👤</span>Profile
+<!-- Navigation -->
+<div class="nav-bar">
+    <div class="nav-item active">🏠</div>
+    <div class="nav-item" onclick="location.href='leaderboard.html'">📊</div>
+    <div class="nav-item" onclick="location.href='profile.html'">👤</div>
+</div>
+
+<!-- Game Invite Popup -->
+<div id="invite-modal">
+    <h3 style="margin:0; color:#ffd700; font-family:'Orbitron'">GAME INVITE!</h3>
+    <p id="inv-msg">Friend wants to play...</p>
+    <div style="display:flex; gap:10px;">
+        <button class="inv-btn" style="background:#00ff66; color:#000; flex:1" onclick="acceptInvite()">ACCEPT</button>
+        <button class="inv-btn" style="background:#ff3333; color:#fff; flex:1" onclick="rejectInvite()">IGNORE</button>
     </div>
 </div>
 
@@ -81,35 +96,44 @@
     const db = firebase.database();
     
     const phone = localStorage.getItem('art_user_phone');
-    if(!phone) window.location.href = 'registration_login.html';
+    if(!phone) window.location.href = 'index.html';
 
-    // Load User Data
+    // Load User
     db.ref('users/' + phone).on('value', snap => {
         const u = snap.val();
-        document.getElementById('u-name').innerText = u.fullName;
+        document.getElementById('u-name').innerText = u.fullName.split(' ')[0];
         document.getElementById('u-user').innerText = u.username;
         document.getElementById('u-score').innerText = u.score;
         document.getElementById('u-img').src = u.photo || "https://i.ibb.co/3M3w113/avatar.png";
     });
 
-    // Season Reset Logic (Client side Check)
-    const currentWeek = getWeekNumber(new Date());
-    if(localStorage.getItem('last_week') != currentWeek) {
-        // Just for visual "Season" notification, real reset needs server function
-        // alert("New Season Started! Good luck.");
-        localStorage.setItem('last_week', currentWeek);
+    // --- GAME INVITE LISTENER ---
+    let currentInvite = null;
+    db.ref('users/' + phone + '/game_invite').on('value', snap => {
+        if(snap.exists()) {
+            currentInvite = snap.val();
+            document.getElementById('inv-msg').innerText = `${currentInvite.fromName} challenges you!`;
+            document.getElementById('invite-modal').style.display = 'block';
+            
+            // Auto hide after 15 seconds
+            setTimeout(() => rejectInvite(), 15000);
+        } else {
+            document.getElementById('invite-modal').style.display = 'none';
+        }
+    });
+
+    function acceptInvite() {
+        if(currentInvite) {
+            // Remove invite
+            db.ref('users/' + phone + '/game_invite').remove();
+            // Join Game
+            window.location.href = `game.html?mode=invite&code=${currentInvite.roomCode}`;
+        }
     }
 
-    function getWeekNumber(d) {
-        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-        var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
-        return weekNo;
-    }
-
-    function playGame(mode) {
-        window.location.href = `game.html?mode=${mode}`;
+    function rejectInvite() {
+        db.ref('users/' + phone + '/game_invite').remove();
+        document.getElementById('invite-modal').style.display = 'none';
     }
 </script>
 </body>
