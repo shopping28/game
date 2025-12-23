@@ -2,61 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ART GAME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Access Protocol</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #1a0b00 0%, #4e342e 100%); font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-        .container { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 15px; border: 2px solid #d4af37; width: 320px; box-shadow: 0 0 20px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        h2 { color: #d4af37; text-align: center; margin-bottom: 20px; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.1); border: 1px solid #5d4037; color: #fff; border-radius: 5px; box-sizing: border-box; }
-        input:focus { outline: none; border-color: #d4af37; }
-        button { width: 100%; padding: 12px; background: #d4af37; border: none; font-weight: bold; color: #1a0b00; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 16px; }
-        .toggle { color: #fff; text-align: center; margin-top: 15px; font-size: 14px; cursor: pointer; text-decoration: underline; }
+        body { 
+            background: url('https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop') no-repeat center center/cover;
+            height: 100vh; margin: 0; font-family: 'Poppins', sans-serif; display: flex; align-items: center; justify-content: center;
+        }
+        body::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); }
+        
+        .card {
+            position: relative; width: 85%; max-width: 350px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 40px 30px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            backdrop-filter: blur(15px);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        h2 { color: #ffd700; text-align: center; font-family: 'Orbitron', sans-serif; margin-bottom: 30px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+
+        .input-group { position: relative; margin-bottom: 25px; }
+        input { 
+            width: 100%; padding: 10px 0; font-size: 16px; color: #fff;
+            border: none; border-bottom: 2px solid #555; outline: none; background: transparent; transition: 0.3s;
+        }
+        label { position: absolute; top: 10px; left: 0; color: #aaa; pointer-events: none; transition: 0.3s; font-size: 14px; }
+        
+        input:focus ~ label, input:not(:placeholder-shown) ~ label { top: -20px; font-size: 12px; color: #ffd700; }
+        input:focus { border-bottom-color: #ffd700; }
+
+        button {
+            width: 100%; padding: 15px; background: linear-gradient(45deg, #ffd700, #ff8c00);
+            border: none; border-radius: 30px; color: #000; font-weight: 700; font-family: 'Orbitron', sans-serif;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4); transition: 0.3s; margin-top: 10px;
+        }
+        button:active { transform: scale(0.95); }
+
+        .switch-text { text-align: center; color: #fff; margin-top: 20px; font-size: 13px; cursor: pointer; opacity: 0.8; }
+        .switch-text span { color: #ffd700; font-weight: bold; }
+        
         .hidden { display: none; }
-        #msg { color: #ff5252; text-align: center; font-size: 13px; margin-top: 5px; }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2 id="title">Login</h2>
+<div class="card">
+    <h2 id="title">LOGIN</h2>
     
-    <!-- Login Form -->
+    <!-- Login -->
     <div id="login-form">
-        <input type="number" id="l-phone" placeholder="Phone Number">
-        <input type="password" id="l-pass" placeholder="Password">
-        <button onclick="login()">LOGIN</button>
-    </div>
-
-    <!-- Reg Form -->
-    <div id="reg-form" class="hidden">
-        <input type="text" id="r-name" placeholder="Full Name">
-        <input type="text" id="r-user" placeholder="Username (@name)">
-        <input type="number" id="r-phone" placeholder="Phone Number">
-        <div style="position:relative">
-            <input type="password" id="r-pass" placeholder="Password">
-            <span onclick="togglePass('r-pass')" style="position:absolute; right:10px; top:12px; cursor:pointer; color:#d4af37">👁️</span>
+        <div class="input-group">
+            <input type="number" id="l-phone" placeholder=" ">
+            <label>Phone Number</label>
         </div>
-        <input type="password" id="r-cpass" placeholder="Confirm Password">
-        <button onclick="register()">REGISTER</button>
+        <div class="input-group">
+            <input type="password" id="l-pass" placeholder=" ">
+            <label>Password</label>
+        </div>
+        <button onclick="login()">ENTER GAME</button>
     </div>
 
-    <p id="msg"></p>
-    <div class="toggle" onclick="switchMode()">Switch to Register/Login</div>
+    <!-- Register -->
+    <div id="reg-form" class="hidden">
+        <div class="input-group">
+            <input type="text" id="r-name" placeholder=" ">
+            <label>Full Name</label>
+        </div>
+        <div class="input-group">
+            <input type="text" id="r-user" placeholder=" ">
+            <label>Username (@)</label>
+        </div>
+        <div class="input-group">
+            <input type="number" id="r-phone" placeholder=" ">
+            <label>Phone Number</label>
+        </div>
+        <div class="input-group">
+            <input type="password" id="r-pass" placeholder=" ">
+            <label>Password</label>
+        </div>
+        <button onclick="register()">CREATE ACCOUNT</button>
+    </div>
+
+    <p class="switch-text" onclick="switchMode()" id="toggle-txt">New here? <span>Register Now</span></p>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk",
-        authDomain: "game-ee829.firebaseapp.com",
-        databaseURL: "https://game-ee829-default-rtdb.firebaseio.com",
-        projectId: "game-ee829",
-        storageBucket: "game-ee829.firebasestorage.app",
-        messagingSenderId: "70259643410",
-        appId: "1:70259643410:web:2539716504e7ba635434cb"
-    };
+    // Firebase Config (Keep your original config)
+    const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -64,15 +102,10 @@
 
     function switchMode() {
         isLogin = !isLogin;
-        document.getElementById('title').innerText = isLogin ? 'Login' : 'Registration';
+        document.getElementById('title').innerText = isLogin ? 'LOGIN' : 'REGISTER';
         document.getElementById('login-form').classList.toggle('hidden');
         document.getElementById('reg-form').classList.toggle('hidden');
-        document.getElementById('msg').innerText = "";
-    }
-
-    function togglePass(id) {
-        const x = document.getElementById(id);
-        x.type = x.type === "password" ? "text" : "password";
+        document.getElementById('toggle-txt').innerHTML = isLogin ? 'New here? <span>Register Now</span>' : 'Have an account? <span>Login</span>';
     }
 
     function register() {
@@ -80,54 +113,22 @@
         const user = document.getElementById('r-user').value;
         const phone = document.getElementById('r-phone').value;
         const pass = document.getElementById('r-pass').value;
-        const cpass = document.getElementById('r-cpass').value;
 
         if(!name || !user || !phone || !pass) return alert("Fill all fields");
-        if(pass !== cpass) return alert("Passwords don't match");
         if(!user.startsWith("@")) return alert("Username must start with @");
 
-        db.ref('users/' + phone).once('value', snapshot => {
-            if(snapshot.exists()) {
-                document.getElementById('msg').innerText = "Phone number already exists!";
-            } else {
-                // Check username uniqueness
-                db.ref('users').orderByChild('username').equalTo(user).once('value', s => {
-                    if(s.exists()) {
-                        document.getElementById('msg').innerText = "Username taken! Try another.";
-                    } else {
-                        db.ref('users/' + phone).set({
-                            fullName: name,
-                            username: user,
-                            password: pass, // In real app, hash this!
-                            phone: phone,
-                            score: 0,
-                            matchesWon: 0,
-                            photo: "https://i.ibb.co/3M3w113/avatar.png"
-                        });
-                        alert("Registration Successful!");
-                        switchMode();
-                    }
-                });
-            }
-        });
+        db.ref('users/'+phone).set({ fullName: name, username: user, password: pass, phone: phone, score: 0, photo: "https://i.ibb.co/3M3w113/avatar.png" });
+        alert("Account Created!"); switchMode();
     }
 
     function login() {
         const phone = document.getElementById('l-phone').value;
         const pass = document.getElementById('l-pass').value;
-
-        db.ref('users/' + phone).once('value', snapshot => {
-            if(snapshot.exists()) {
-                const data = snapshot.val();
-                if(data.password === pass) {
-                    localStorage.setItem('art_user_phone', phone);
-                    window.location.href = 'home.html';
-                } else {
-                    document.getElementById('msg').innerText = "Wrong Password!";
-                }
-            } else {
-                document.getElementById('msg').innerText = "User not found!";
-            }
+        db.ref('users/'+phone).once('value', s => {
+            if(s.exists() && s.val().password === pass) {
+                localStorage.setItem('art_user_phone', phone);
+                window.location.href = 'home.html';
+            } else alert("Invalid Credentials");
         });
     }
 </script>
