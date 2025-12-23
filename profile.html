@@ -6,22 +6,55 @@
     <title>Profile</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #2d1e12; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        input { display: block; margin: 10px 0; padding: 10px; width: 250px; background: rgba(0,0,0,0.3); border: 1px solid #8d6e63; color: white; border-radius: 5px; }
-        button { padding: 10px 20px; background: #d4af37; border: none; border-radius: 5px; margin-top: 10px; cursor: pointer; font-weight: bold; }
-        .logout { background: #d32f2f; color: white; }
+        body { background: #0f0f12; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 50px; }
+        
+        .avatar-container { position: relative; margin-bottom: 20px; }
+        .avatar-lg { width: 120px; height: 120px; border-radius: 50%; border: 3px solid #ffd700; object-fit: cover; box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
+        .camera-icon { 
+            position: absolute; bottom: 5px; right: 5px; background: #ffd700; color: #000;
+            width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 18px; border: 2px solid #000;
+        }
+
+        .input-group { width: 80%; max-width: 350px; margin-bottom: 15px; }
+        label { display: block; color: #888; font-size: 12px; margin-bottom: 5px; margin-left: 10px; }
+        input { width: 100%; background: #1e1e24; border: 1px solid #333; padding: 15px; border-radius: 12px; color: #fff; box-sizing: border-box; }
+        
+        .btn-save { background: #ffd700; color: #000; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 20px; cursor: pointer; font-family: 'Orbitron'; width: 80%; max-width: 350px; }
+        .btn-logout { background: #ff3333; color: #fff; border: none; padding: 15px 40px; border-radius: 30px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 80%; max-width: 350px; }
+        
+        /* Loading Overlay */
+        #loader { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; display: none; z-index: 100; }
     </style>
 </head>
 <body>
-    <h1>EDIT PROFILE</h1>
-    <input type="text" id="p-name" placeholder="Full Name">
-    <input type="text" id="p-user" placeholder="Username" disabled style="opacity:0.6">
-    <input type="password" id="p-pass" placeholder="New Password">
     
-    <button onclick="update()">SAVE CHANGES</button>
-    <button class="logout" onclick="logout()">LOGOUT</button>
-    <button style="background:none; color:#888; text-decoration:underline" onclick="location.href='home.html'">Back Home</button>
+    <div id="loader">Processing...</div>
+
+    <div class="avatar-container">
+        <img src="https://i.ibb.co/3M3w113/avatar.png" class="avatar-lg" id="p-img">
+        <label for="file-upload" class="camera-icon">📷</label>
+        <input type="file" id="file-upload" accept="image/*" hidden onchange="handleImage(this)">
+    </div>
+    
+    <div class="input-group">
+        <label>FULL NAME</label>
+        <input type="text" id="p-name">
+    </div>
+    <div class="input-group">
+        <label>USERNAME</label>
+        <input type="text" id="p-user" disabled style="opacity:0.5; cursor: not-allowed;">
+    </div>
+    <div class="input-group">
+        <label>CHANGE PASSWORD</label>
+        <input type="password" id="p-pass" placeholder="Leave empty to keep current">
+    </div>
+
+    <button class="btn-save" onclick="update()">SAVE PROFILE</button>
+    <button class="btn-logout" onclick="logout()">LOGOUT</button>
+    <p onclick="location.href='home.html'" style="color:#555; margin-top:20px; cursor:pointer">Return Home</p>
 
     <script>
         const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
@@ -29,23 +62,68 @@
         const db = firebase.database();
         const phone = localStorage.getItem('art_user_phone');
 
+        let currentPhoto = "";
+
+        // Load Data
         db.ref('users/'+phone).once('value', s => {
-            document.getElementById('p-name').value = s.val().fullName;
-            document.getElementById('p-user').value = s.val().username;
+            const u = s.val();
+            document.getElementById('p-name').value = u.fullName;
+            document.getElementById('p-user').value = u.username;
+            if(u.photo) {
+                document.getElementById('p-img').src = u.photo;
+                currentPhoto = u.photo;
+            }
         });
+
+        // Image Compressor Logic
+        function handleImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                document.getElementById('loader').style.display = 'flex';
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Resize to 150x150 max to save database space
+                        const maxWidth = 150;
+                        const scaleSize = maxWidth / img.width;
+                        canvas.width = maxWidth;
+                        canvas.height = img.height * scaleSize;
+
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // Convert to Base64 String
+                        currentPhoto = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+                        document.getElementById('p-img').src = currentPhoto;
+                        document.getElementById('loader').style.display = 'none';
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
 
         function update() {
             const name = document.getElementById('p-name').value;
             const pass = document.getElementById('p-pass').value;
-            let data = { fullName: name };
+            
+            let data = { fullName: name, photo: currentPhoto };
             if(pass) data.password = pass;
 
-            db.ref('users/'+phone).update(data).then(() => alert("Profile Updated!"));
+            db.ref('users/'+phone).update(data).then(() => {
+                alert("Profile Saved!");
+            });
         }
 
         function logout() {
-            localStorage.removeItem('art_user_phone');
-            window.location.href = 'index.html';
+            if(confirm("Are you sure?")) {
+                localStorage.removeItem('art_user_phone');
+                window.location.href = 'index.html';
+            }
         }
     </script>
 </body>
