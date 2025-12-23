@@ -2,34 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ART ARTIFICIAL GAME</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ART ARTIFICIAL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { margin:0; background:#000; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; overflow:hidden;}
-        .loader { text-align:center; animation: fadeIn 2s ease-in-out; }
-        h1 { color: #d4af37; font-size: 3rem; text-shadow: 0 0 20px #d4af37; margin:0; letter-spacing: 5px; }
-        p { color: #fff; letter-spacing: 3px; margin-top:10px; }
-        .bar { width: 200px; height: 4px; background: #333; margin: 20px auto; border-radius: 2px; overflow: hidden; }
-        .fill { width: 0%; height: 100%; background: #d4af37; animation: load 3s forwards; }
-        @keyframes load { 100% { width: 100%; } }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        body { margin:0; background:#050505; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; overflow:hidden; font-family: 'Poppins', sans-serif; }
+        
+        .logo-container { position: relative; width: 150px; height: 150px; margin-bottom: 30px; }
+        .circle { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: #ffd700; animation: spin 2s linear infinite; }
+        .circle:nth-child(2) { width: 80%; height: 80%; top: 10%; left: 10%; border-top-color: #ff0055; animation: spin 1.5s linear infinite reverse; }
+        .text-logo { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 40px; color: #fff; text-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        
+        h2 { color: #fff; font-family: 'Orbitron', sans-serif; letter-spacing: 5px; font-size: 24px; margin: 0; opacity: 0; animation: fadeUp 1s forwards 0.5s; }
+        p { color: #888; letter-spacing: 2px; font-size: 12px; margin-top: 5px; opacity: 0; animation: fadeUp 1s forwards 1s; }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
-    <div class="loader">
-        <h1>ART ARTIFICIAL</h1>
-        <p>GAME STUDIOS</p>
-        <div class="bar"><div class="fill"></div></div>
+    <div class="logo-container">
+        <div class="circle"></div>
+        <div class="circle"></div>
+        <div class="text-logo">A</div>
     </div>
+    <h2>ART ARTIFICIAL</h2>
+    <p>PREMIUM GAMING STUDIOS</p>
+
     <script>
         setTimeout(() => {
-            // Check if logged in
             if(localStorage.getItem('art_user_phone')) {
                 window.location.href = 'home.html';
             } else {
                 window.location.href = 'registration_login.html';
             }
-        }, 3000);
+        }, 3500);
     </script>
 </body>
 </html>
