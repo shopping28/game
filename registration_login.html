@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ART GAME</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { background: linear-gradient(135deg, #1a0b00 0%, #4e342e 100%); font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+        .container { background: rgba(0,0,0,0.6); padding: 30px; border-radius: 15px; border: 2px solid #d4af37; width: 320px; box-shadow: 0 0 20px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        h2 { color: #d4af37; text-align: center; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.1); border: 1px solid #5d4037; color: #fff; border-radius: 5px; box-sizing: border-box; }
+        input:focus { outline: none; border-color: #d4af37; }
+        button { width: 100%; padding: 12px; background: #d4af37; border: none; font-weight: bold; color: #1a0b00; border-radius: 5px; cursor: pointer; margin-top: 15px; font-size: 16px; }
+        .toggle { color: #fff; text-align: center; margin-top: 15px; font-size: 14px; cursor: pointer; text-decoration: underline; }
+        .hidden { display: none; }
+        #msg { color: #ff5252; text-align: center; font-size: 13px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 id="title">Login</h2>
+    
+    <!-- Login Form -->
+    <div id="login-form">
+        <input type="number" id="l-phone" placeholder="Phone Number">
+        <input type="password" id="l-pass" placeholder="Password">
+        <button onclick="login()">LOGIN</button>
+    </div>
+
+    <!-- Reg Form -->
+    <div id="reg-form" class="hidden">
+        <input type="text" id="r-name" placeholder="Full Name">
+        <input type="text" id="r-user" placeholder="Username (@name)">
+        <input type="number" id="r-phone" placeholder="Phone Number">
+        <div style="position:relative">
+            <input type="password" id="r-pass" placeholder="Password">
+            <span onclick="togglePass('r-pass')" style="position:absolute; right:10px; top:12px; cursor:pointer; color:#d4af37">👁️</span>
+        </div>
+        <input type="password" id="r-cpass" placeholder="Confirm Password">
+        <button onclick="register()">REGISTER</button>
+    </div>
+
+    <p id="msg"></p>
+    <div class="toggle" onclick="switchMode()">Switch to Register/Login</div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk",
+        authDomain: "game-ee829.firebaseapp.com",
+        databaseURL: "https://game-ee829-default-rtdb.firebaseio.com",
+        projectId: "game-ee829",
+        storageBucket: "game-ee829.firebasestorage.app",
+        messagingSenderId: "70259643410",
+        appId: "1:70259643410:web:2539716504e7ba635434cb"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    let isLogin = true;
+
+    function switchMode() {
+        isLogin = !isLogin;
+        document.getElementById('title').innerText = isLogin ? 'Login' : 'Registration';
+        document.getElementById('login-form').classList.toggle('hidden');
+        document.getElementById('reg-form').classList.toggle('hidden');
+        document.getElementById('msg').innerText = "";
+    }
+
+    function togglePass(id) {
+        const x = document.getElementById(id);
+        x.type = x.type === "password" ? "text" : "password";
+    }
+
+    function register() {
+        const name = document.getElementById('r-name').value;
+        const user = document.getElementById('r-user').value;
+        const phone = document.getElementById('r-phone').value;
+        const pass = document.getElementById('r-pass').value;
+        const cpass = document.getElementById('r-cpass').value;
+
+        if(!name || !user || !phone || !pass) return alert("Fill all fields");
+        if(pass !== cpass) return alert("Passwords don't match");
+        if(!user.startsWith("@")) return alert("Username must start with @");
+
+        db.ref('users/' + phone).once('value', snapshot => {
+            if(snapshot.exists()) {
+                document.getElementById('msg').innerText = "Phone number already exists!";
+            } else {
+                // Check username uniqueness
+                db.ref('users').orderByChild('username').equalTo(user).once('value', s => {
+                    if(s.exists()) {
+                        document.getElementById('msg').innerText = "Username taken! Try another.";
+                    } else {
+                        db.ref('users/' + phone).set({
+                            fullName: name,
+                            username: user,
+                            password: pass, // In real app, hash this!
+                            phone: phone,
+                            score: 0,
+                            matchesWon: 0,
+                            photo: "https://i.ibb.co/3M3w113/avatar.png"
+                        });
+                        alert("Registration Successful!");
+                        switchMode();
+                    }
+                });
+            }
+        });
+    }
+
+    function login() {
+        const phone = document.getElementById('l-phone').value;
+        const pass = document.getElementById('l-pass').value;
+
+        db.ref('users/' + phone).once('value', snapshot => {
+            if(snapshot.exists()) {
+                const data = snapshot.val();
+                if(data.password === pass) {
+                    localStorage.setItem('art_user_phone', phone);
+                    window.location.href = 'home.html';
+                } else {
+                    document.getElementById('msg').innerText = "Wrong Password!";
+                }
+            } else {
+                document.getElementById('msg').innerText = "User not found!";
+            }
+        });
+    }
+</script>
+</body>
+</html>
