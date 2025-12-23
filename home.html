@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - ART GAME</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { margin: 0; background: #2d1e12; font-family: sans-serif; color: #fff; }
+        .header { background: #1a0b00; padding: 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #d4af37; }
+        .user-info { display: flex; align-items: center; gap: 10px; }
+        .avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #d4af37; }
+        .coins { background: #3e2723; padding: 5px 15px; border-radius: 20px; color: #ffd700; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; }
+        .card { background: linear-gradient(45deg, #3e2723, #5d4037); padding: 30px; border-radius: 15px; text-align: center; border: 2px solid #8d6e63; cursor: pointer; transition: 0.2s; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .card:active { transform: scale(0.95); }
+        .card h3 { margin: 10px 0 0; color: #ffcc80; }
+        .card-lg { grid-column: span 2; background: linear-gradient(45deg, #b71c1c, #d32f2f); border-color: #ff5252; }
+        .icon { font-size: 40px; }
+        .footer { position: fixed; bottom: 0; width: 100%; background: #1a0b00; display: flex; justify-content: space-around; padding: 10px 0; border-top: 2px solid #d4af37; }
+        .nav-item { text-align: center; color: #8d6e63; font-size: 12px; cursor: pointer; }
+        .nav-item.active { color: #d4af37; }
+        .nav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="user-info">
+        <img src="" id="u-img" class="avatar">
+        <div>
+            <div id="u-name" style="font-weight:bold">Loading...</div>
+            <div id="u-user" style="font-size:12px; color:#aaa">...</div>
+        </div>
+    </div>
+    <div class="coins">🏆 <span id="u-score">0</span></div>
+</div>
+
+<div class="grid">
+    <div class="card card-lg" onclick="playGame('online')">
+        <div class="icon">🌍</div>
+        <h3>PLAY ONLINE</h3>
+        <small>Random Match • Win Score</small>
+    </div>
+    
+    <div class="card" onclick="playGame('offline')">
+        <div class="icon">🤖</div>
+        <h3>OFFLINE</h3>
+        <small>Vs Bot / 2P</small>
+    </div>
+
+    <div class="card" onclick="location.href='invite.html'">
+        <div class="icon">⚔️</div>
+        <h3>INVITE</h3>
+        <small>Play w/ Friends</small>
+    </div>
+
+    <div class="card" style="background:#1b5e20" onclick="location.href='leaderboard.html'">
+        <div class="icon">📊</div>
+        <h3>RANKING</h3>
+        <small>Top 10</small>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="nav-item active">
+        <span class="nav-icon">🏠</span>Home
+    </div>
+    <div class="nav-item" onclick="location.href='leaderboard.html'">
+        <span class="nav-icon">🏆</span>Rank
+    </div>
+    <div class="nav-item" onclick="location.href='profile.html'">
+        <span class="nav-icon">👤</span>Profile
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    
+    const phone = localStorage.getItem('art_user_phone');
+    if(!phone) window.location.href = 'registration_login.html';
+
+    // Load User Data
+    db.ref('users/' + phone).on('value', snap => {
+        const u = snap.val();
+        document.getElementById('u-name').innerText = u.fullName;
+        document.getElementById('u-user').innerText = u.username;
+        document.getElementById('u-score').innerText = u.score;
+        document.getElementById('u-img').src = u.photo || "https://i.ibb.co/3M3w113/avatar.png";
+    });
+
+    // Season Reset Logic (Client side Check)
+    const currentWeek = getWeekNumber(new Date());
+    if(localStorage.getItem('last_week') != currentWeek) {
+        // Just for visual "Season" notification, real reset needs server function
+        // alert("New Season Started! Good luck.");
+        localStorage.setItem('last_week', currentWeek);
+    }
+
+    function getWeekNumber(d) {
+        d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+        var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+        var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+        return weekNo;
+    }
+
+    function playGame(mode) {
+        window.location.href = `game.html?mode=${mode}`;
+    }
+</script>
+</body>
+</html>
