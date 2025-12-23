@@ -3,50 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard</title>
+    <title>Ranking</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #1a0b00; color: #fff; font-family: sans-serif; padding: 20px; }
-        h1 { color: #d4af37; text-align: center; }
-        .list { max-width: 500px; margin: 0 auto; }
-        .item { background: #3e2723; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; border-left: 5px solid #8d6e63; }
-        .rank-1 { border-color: #ffd700; background: linear-gradient(90deg, #3e2723, #5d4037); }
-        .score { font-weight: bold; color: #ffcc80; }
-        .back { display: block; margin: 20px auto; padding: 10px 30px; background: #5d4037; color: white; border: none; border-radius: 5px; }
+        body { background: #121212; color: #fff; font-family: 'Poppins', sans-serif; padding: 20px; }
+        
+        .top-header { text-align: center; margin-bottom: 30px; }
+        .top-header h1 { font-family: 'Orbitron'; color: #ffd700; text-shadow: 0 0 20px rgba(255, 215, 0, 0.4); margin: 0; }
+        .top-header p { color: #888; margin-top: 5px; font-size: 12px; }
+
+        .list { background: #1e1e24; border-radius: 20px; padding: 10px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .item { display: flex; align-items: center; justify-content: space-between; padding: 15px; margin-bottom: 8px; background: #25252d; border-radius: 12px; transition: 0.2s; }
+        
+        /* Rank Colors */
+        .rank-1 { background: linear-gradient(90deg, #ffd700 0%, #b8860b 100%); color: #000; font-weight: bold; transform: scale(1.02); box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3); }
+        .rank-2 { border-left: 4px solid #c0c0c0; }
+        .rank-3 { border-left: 4px solid #cd7f32; }
+
+        .user-detail { display: flex; align-items: center; gap: 15px; }
+        .rank-num { font-family: 'Orbitron'; font-size: 18px; width: 30px; }
+        .score { font-family: 'Orbitron'; color: #ffd700; }
+        .rank-1 .score { color: #000; }
+
+        .back-btn { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 30px; border-radius: 30px; text-decoration: none; border: 1px solid #555; }
     </style>
 </head>
 <body>
-    <h1>TOP PLAYERS (Season 1)</h1>
-    <div class="list" id="list">
-        <div style="text-align:center; color:#888;">Loading...</div>
-    </div>
-    <button class="back" onclick="location.href='home.html'">BACK</button>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
-        firebase.initializeApp(firebaseConfig);
-        
-        firebase.database().ref('users').orderByChild('score').limitToLast(10).once('value', snap => {
-            const list = document.getElementById('list');
-            list.innerHTML = '';
-            let users = [];
-            snap.forEach(c => users.push(c.val()));
-            users.reverse(); // Highest score first
+<div class="top-header">
+    <h1>LEADERBOARD</h1>
+    <p>SEASON 1 • GLOBAL RANKING</p>
+</div>
 
-            users.forEach((u, i) => {
-                let cls = i===0 ? 'rank-1' : '';
-                list.innerHTML += `
-                    <div class="item ${cls}">
-                        <div>
-                            <span style="font-weight:bold; margin-right:10px;">#${i+1}</span>
-                            ${u.username}
-                        </div>
-                        <div class="score">🏆 ${u.score}</div>
+<div class="list" id="list">
+    <!-- Items injected by JS -->
+    <div style="text-align:center; padding:20px; color:#555;">Loading Data...</div>
+</div>
+
+<a href="home.html" class="back-btn">RETURN HOME</a>
+
+<script>
+    // Firebase Config
+    const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
+    firebase.initializeApp(firebaseConfig);
+    
+    firebase.database().ref('users').orderByChild('score').limitToLast(10).once('value', snap => {
+        const list = document.getElementById('list');
+        list.innerHTML = '';
+        let users = [];
+        snap.forEach(c => users.push(c.val()));
+        users.reverse();
+
+        users.forEach((u, i) => {
+            let cls = i===0 ? 'rank-1' : (i===1 ? 'rank-2' : (i===2 ? 'rank-3' : ''));
+            let medal = i===0 ? '👑' : (i===1 ? '🥈' : (i===2 ? '🥉' : `#${i+1}`));
+            
+            list.innerHTML += `
+                <div class="item ${cls}">
+                    <div class="user-detail">
+                        <span class="rank-num">${medal}</span>
+                        <span>${u.fullName}</span>
                     </div>
-                `;
-            });
+                    <div class="score">${u.score}</div>
+                </div>
+            `;
         });
-    </script>
+    });
+</script>
 </body>
 </html>
