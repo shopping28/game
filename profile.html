@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { background: #2d1e12; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        input { display: block; margin: 10px 0; padding: 10px; width: 250px; background: rgba(0,0,0,0.3); border: 1px solid #8d6e63; color: white; border-radius: 5px; }
+        button { padding: 10px 20px; background: #d4af37; border: none; border-radius: 5px; margin-top: 10px; cursor: pointer; font-weight: bold; }
+        .logout { background: #d32f2f; color: white; }
+    </style>
+</head>
+<body>
+    <h1>EDIT PROFILE</h1>
+    <input type="text" id="p-name" placeholder="Full Name">
+    <input type="text" id="p-user" placeholder="Username" disabled style="opacity:0.6">
+    <input type="password" id="p-pass" placeholder="New Password">
+    
+    <button onclick="update()">SAVE CHANGES</button>
+    <button class="logout" onclick="logout()">LOGOUT</button>
+    <button style="background:none; color:#888; text-decoration:underline" onclick="location.href='home.html'">Back Home</button>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const phone = localStorage.getItem('art_user_phone');
+
+        db.ref('users/'+phone).once('value', s => {
+            document.getElementById('p-name').value = s.val().fullName;
+            document.getElementById('p-user').value = s.val().username;
+        });
+
+        function update() {
+            const name = document.getElementById('p-name').value;
+            const pass = document.getElementById('p-pass').value;
+            let data = { fullName: name };
+            if(pass) data.password = pass;
+
+            db.ref('users/'+phone).update(data).then(() => alert("Profile Updated!"));
+        }
+
+        function logout() {
+            localStorage.removeItem('art_user_phone');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
