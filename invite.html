@@ -2,90 +2,191 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Host Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lobby - Invite</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body { background: #0f0f12; color: #fff; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 20px; height: 100vh; margin:0; }
+        body { 
+            background: #050505; color: #fff; font-family: 'Poppins', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            height: 100vh; margin: 0; padding-top: 30px; box-sizing: border-box;
+            background-image: radial-gradient(circle at 50% 0%, #1a1a20 0%, #000 70%);
+        }
         
-        .code-display { font-family: 'Orbitron'; font-size: 32px; color: #ffd700; letter-spacing: 5px; margin: 20px 0; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
-        .start-btn { background: #ffd700; color: #000; padding: 10px 40px; border-radius: 30px; border: none; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; margin-bottom: 20px; }
+        h2 { 
+            font-family: 'Orbitron'; color: #ffd700; letter-spacing: 3px; 
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.4); margin-bottom: 5px; 
+        }
+        p { color: #888; font-size: 12px; margin-top: 0; }
 
-        .friend-panel { width: 90%; max-width: 400px; background: #1e1e24; flex: 1; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .f-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #333; }
-        .invite-btn { background: linear-gradient(45deg, #00c6ff, #0072ff); color: white; border: none; padding: 8px 20px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; }
-        .invite-btn:active { transform: scale(0.95); }
+        /* Room Code Section */
+        .room-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px; border-radius: 20px; text-align: center;
+            width: 85%; max-width: 350px; backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
 
-        .sent { background: #333 !important; color: #aaa !important; cursor: default; }
+        .code-display { 
+            font-family: 'Orbitron'; font-size: 36px; color: #fff; 
+            letter-spacing: 8px; margin: 15px 0; 
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            background: #000; padding: 10px; border-radius: 10px; border: 1px dashed #555;
+        }
+
+        .btn-enter { 
+            background: linear-gradient(45deg, #ffd700, #ff8c00); 
+            color: #000; border: none; padding: 12px 30px; 
+            border-radius: 30px; font-weight: bold; font-family: 'Orbitron'; 
+            cursor: pointer; width: 100%; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+        .btn-enter:active { transform: scale(0.95); }
+
+        /* Friend List Section */
+        .friend-panel { 
+            flex: 1; width: 100%; background: #121215; 
+            border-radius: 30px 30px 0 0; border-top: 1px solid #333;
+            padding: 25px; box-sizing: border-box; overflow-y: auto;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+        }
+
+        .section-title { font-family: 'Orbitron'; font-size: 14px; color: #555; margin-bottom: 15px; display: block; }
+
+        .f-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px; margin-bottom: 10px; background: #1e1e24; 
+            border-radius: 15px; border: 1px solid #2a2a30; 
+        }
+
+        .f-info b { display: block; font-size: 15px; color: #eee; }
+        .f-info span { font-size: 11px; color: #888; }
+
+        .invite-btn { 
+            background: rgba(0, 255, 136, 0.1); color: #00ff88; border: 1px solid #00ff88;
+            padding: 8px 20px; border-radius: 20px; font-size: 11px; font-weight: bold; font-family: 'Orbitron';
+            cursor: pointer; transition: 0.2s;
+        }
+        .invite-btn:active { background: #00ff88; color: #000; }
+        
+        .sent { background: #333 !important; color: #aaa !important; border-color: #555 !important; cursor: default; }
+
+        /* Manual Join Input */
+        .join-box { display: flex; gap: 10px; margin-top: 10px; }
+        .join-input { 
+            background: #111; border: 1px solid #444; color: #fff; padding: 10px; 
+            border-radius: 10px; flex: 1; text-align: center; font-family: 'Orbitron'; outline: none;
+        }
+        .btn-join { background: #333; color: #fff; border: none; padding: 0 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+
+        .back-link { margin-top: 20px; color: #666; font-size: 12px; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
-    <h2 style="font-family:'Orbitron'; margin-bottom:0">GAME ROOM</h2>
-    <div class="code-display" id="roomCode">...</div>
-    <button class="start-btn" onclick="enterGame()">ENTER LOBBY</button>
+    <h2>GAME LOBBY</h2>
+    <p>SHARE CODE OR INVITE FRIENDS</p>
+
+    <div class="room-box">
+        <span style="font-size:10px; color:#aaa; letter-spacing:1px;">YOUR ROOM CODE</span>
+        <div class="code-display" id="roomCode">...</div>
+        <button class="btn-enter" onclick="enterGame()">ENTER ROOM</button>
+        
+        <div class="join-box">
+            <input type="number" id="joinInput" class="join-input" placeholder="Enter Code">
+            <button class="btn-join" onclick="joinGame()">JOIN</button>
+        </div>
+    </div>
 
     <div class="friend-panel">
-        <h4 style="margin-top:0; color:#888">INVITE ONLINE FRIENDS</h4>
-        <div id="f-list">Loading friends...</div>
+        <span class="section-title">ONLINE FRIENDS</span>
+        <div id="f-list" style="text-align:center; color:#444; font-size:13px;">Loading friends...</div>
+        
+        <div class="back-link" onclick="location.href='home.html'">RETURN TO DASHBOARD</div>
     </div>
-    
-    <div style="padding:10px; cursor:pointer; color:#555" onclick="location.href='home.html'">Cancel</div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
+    // Generate Random 4-digit Code
     const code = Math.floor(1000 + Math.random() * 9000);
     document.getElementById('roomCode').innerText = code;
     
     const myPhone = localStorage.getItem('art_user_phone');
-    let myName = "Unknown";
+    if(!myPhone) window.location.href = 'index.html';
 
-    // Get My Name
-    db.ref('users/'+myPhone).once('value', s => myName = s.val().fullName);
+    let myName = "Player";
 
-    // Load Invite List
+    // Fetch My Name
+    db.ref('users/'+myPhone).once('value', s => {
+        if(s.exists()) myName = s.val().fullName;
+    });
+
+    // Load Friend List
     db.ref('users/' + myPhone + '/friends').once('value', snap => {
         const list = document.getElementById('f-list');
         list.innerHTML = '';
         
-        if(!snap.exists()) { list.innerHTML = 'No friends added.'; return; }
+        if(!snap.exists()) { 
+            list.innerHTML = 'No friends added yet.<br><span style="font-size:10px" onclick="location.href=\'friends.html\'">Add friends here</span>'; 
+            return; 
+        }
 
         snap.forEach(f => {
             const fPhone = f.key;
             db.ref('users/' + fPhone).once('value', uSnap => {
                 const u = uSnap.val();
-                list.innerHTML += `
-                    <div class="f-item">
-                        <div><b>${u.fullName}</b><br><small style="color:#aaa">${u.username}</small></div>
-                        <button class="invite-btn" id="btn-${fPhone}" onclick="sendInvite('${fPhone}')">INVITE</button>
-                    </div>
-                `;
+                if(u) {
+                    list.innerHTML += `
+                        <div class="f-item">
+                            <div class="f-info">
+                                <b>${u.fullName}</b>
+                                <span>${u.username}</span>
+                            </div>
+                            <button class="invite-btn" id="btn-${fPhone}" onclick="sendInvite('${fPhone}')">INVITE</button>
+                        </div>
+                    `;
+                }
             });
         });
     });
 
+    // Send Invite Notification
     function sendInvite(friendPhone) {
-        // Send Notification to Friend
+        const btn = document.getElementById('btn-' + friendPhone);
+        
+        // Push notification to friend's node
         db.ref('users/' + friendPhone + '/game_invite').set({
             from: myPhone,
             fromName: myName,
             roomCode: code,
             timestamp: Date.now()
+        }).then(() => {
+            btn.innerText = "SENT";
+            btn.classList.add('sent');
+            btn.disabled = true;
         });
-
-        const btn = document.getElementById('btn-' + friendPhone);
-        btn.innerText = "SENT";
-        btn.classList.add('sent');
-        btn.disabled = true;
     }
 
+    // Host Enters Game
     function enterGame() {
         window.location.href = `game.html?mode=invite&code=${code}`;
+    }
+
+    // User Joins via Code Input
+    function joinGame() {
+        const inputCode = document.getElementById('joinInput').value;
+        if(inputCode.length === 4) {
+            window.location.href = `game.html?mode=invite&code=${inputCode}`;
+        } else {
+            alert("Please enter a valid 4-digit code");
+        }
     }
 </script>
 </body>
