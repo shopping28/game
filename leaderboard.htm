@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { background: #1a0b00; color: #fff; font-family: sans-serif; padding: 20px; }
+        h1 { color: #d4af37; text-align: center; }
+        .list { max-width: 500px; margin: 0 auto; }
+        .item { background: #3e2723; padding: 15px; margin-bottom: 10px; border-radius: 10px; display: flex; justify-content: space-between; border-left: 5px solid #8d6e63; }
+        .rank-1 { border-color: #ffd700; background: linear-gradient(90deg, #3e2723, #5d4037); }
+        .score { font-weight: bold; color: #ffcc80; }
+        .back { display: block; margin: 20px auto; padding: 10px 30px; background: #5d4037; color: white; border: none; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>TOP PLAYERS (Season 1)</h1>
+    <div class="list" id="list">
+        <div style="text-align:center; color:#888;">Loading...</div>
+    </div>
+    <button class="back" onclick="location.href='home.html'">BACK</button>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
+        firebase.initializeApp(firebaseConfig);
+        
+        firebase.database().ref('users').orderByChild('score').limitToLast(10).once('value', snap => {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+            let users = [];
+            snap.forEach(c => users.push(c.val()));
+            users.reverse(); // Highest score first
+
+            users.forEach((u, i) => {
+                let cls = i===0 ? 'rank-1' : '';
+                list.innerHTML += `
+                    <div class="item ${cls}">
+                        <div>
+                            <span style="font-weight:bold; margin-right:10px;">#${i+1}</span>
+                            ${u.username}
+                        </div>
+                        <div class="score">🏆 ${u.score}</div>
+                    </div>
+                `;
+            });
+        });
+    </script>
+</body>
+</html>
