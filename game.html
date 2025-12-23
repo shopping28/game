@@ -3,78 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Arena</title>
+<title>Classic Bead 16</title>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500;700&display=swap" rel="stylesheet">
 <style>
     body { 
-        margin: 0; overflow: hidden; background: #050505; touch-action: none;
-        background-image: radial-gradient(circle at 50% 50%, #1a1a20 0%, #000 100%);
+        margin: 0; overflow: hidden; 
+        font-family: 'Roboto', sans-serif;
+        /* Realistic Wood Texture via CSS */
+        background-color: #deb887;
+        background-image: 
+            linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+            repeating-linear-gradient(45deg, rgba(139, 69, 19, 0.05) 0, rgba(139, 69, 19, 0.05) 2px, transparent 2px, transparent 6px);
+        background-size: 50px 50px, 50px 50px, 100% 100%;
+        touch-action: none;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
 
+    /* Wooden Scoreboard */
     #hud { 
-        position: absolute; top: 10px; left: 2%; width: 96%; 
-        display: flex; justify-content: space-between; padding: 15px; 
-        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 15px; backdrop-filter: blur(5px); box-sizing: border-box; z-index: 10;
+        position: absolute; top: 20px; width: 90%; max-width: 400px;
+        display: flex; justify-content: space-between; padding: 15px 25px; 
+        background: #5d4037; /* Dark Wood */
+        border: 4px solid #3e2723;
+        border-radius: 15px; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
+        color: #fff; z-index: 10;
     }
-    .p-card { display: flex; align-items: center; gap: 10px; font-family: 'Orbitron'; color: #fff; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 10px currentColor; }
+    
+    .p-card { display: flex; flex-direction: column; align-items: center; }
+    .p-label { font-size: 12px; color: #d7ccc8; font-weight: bold; letter-spacing: 1px; }
+    .p-score { font-size: 28px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
+    
+    .vs-badge {
+        background: #8d6e63; width: 40px; height: 40px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: bold; color: #3e2723; border: 2px solid #3e2723;
+        align-self: center; box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+    }
 
+    /* Status Notification */
     #status {
-        position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-        background: rgba(0,0,0,0.8); border: 1px solid #333; color: #fff;
-        padding: 10px 30px; border-radius: 30px; font-family: 'Orbitron'; letter-spacing: 2px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 10; pointer-events: none;
+        position: absolute; bottom: 30px; 
+        background: #fff8e1; color: #5d4037; border: 2px solid #8d6e63;
+        padding: 10px 30px; border-radius: 25px; font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 10; pointer-events: none;
+        font-size: 16px; letter-spacing: 1px;
     }
 
     canvas { display: block; width: 100%; height: 100%; }
 
     /* Modal */
-    #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; display: none; }
-    .loader { border: 5px solid #333; border-top: 5px solid #ffd700; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+    #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; display: none; backdrop-filter: blur(3px); }
+    
+    .modal-content {
+        background: #fff3e0; border: 5px solid #5d4037;
+        padding: 30px; border-radius: 15px; text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 80%; max-width: 300px;
+    }
+    
+    .loader { border: 4px solid #d7ccc8; border-top: 4px solid #5d4037; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px auto; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
-    h2 { color: #fff; font-family: 'Orbitron'; letter-spacing: 2px; }
+    
+    h2 { color: #3e2723; margin: 0; font-size: 20px; }
+    p { color: #6d4c41; font-size: 14px; margin-top: 10px; }
+
+    button {
+        background: #5d4037; color: white; border: none; padding: 10px 25px;
+        border-radius: 20px; font-weight: bold; margin-top: 20px; cursor: pointer;
+        box-shadow: 0 4px 0 #3e2723; transition: 0.1s;
+    }
+    button:active { transform: translateY(4px); box-shadow: 0 0 0 #3e2723; }
+
 </style>
 </head>
 <body>
 
 <div id="hud">
-    <div class="p-card" style="color: #ff3333">
-        <div class="dot" style="background:#ff3333"></div>
-        <span>OPP: <span id="s-opp">16</span></span>
+    <div class="p-card">
+        <span class="p-label" style="color:#ff8a80">OPPONENT</span>
+        <span class="p-score" id="s-opp">16</span>
     </div>
-    <div class="p-card" style="color: #3388ff">
-        <span>YOU: <span id="s-you">16</span></span>
-        <div class="dot" style="background:#3388ff"></div>
+    <div class="vs-badge">VS</div>
+    <div class="p-card">
+        <span class="p-label" style="color:#90caf9">YOU</span>
+        <span class="p-score" id="s-you">16</span>
     </div>
 </div>
 
-<div id="status">INITIALIZING...</div>
+<div id="status">Waiting for game...</div>
 <canvas id="canvas"></canvas>
 
 <div id="modal">
-    <div class="loader"></div>
-    <h2 id="m-msg">SEARCHING OPPONENT...</h2>
-    <button onclick="location.href='home.html'" style="margin-top:20px; padding:10px 30px; background:none; border:1px solid #555; color:#fff; border-radius:20px;">CANCEL</button>
+    <div class="modal-content">
+        <div class="loader"></div>
+        <h2 id="m-title">Searching...</h2>
+        <p id="m-desc">Finding an opponent</p>
+        <button onclick="location.href='home.html'">Cancel</button>
+    </div>
 </div>
 
 <script>
-    // Copy Game Logic from previous response but Updated Draw Function
     const firebaseConfig = { apiKey: "AIzaSyC2Uxgv0vjY2G6xgQ6jAwOkKHIp8wKRFvk", authDomain: "game-ee829.firebaseapp.com", databaseURL: "https://game-ee829-default-rtdb.firebaseio.com", projectId: "game-ee829", storageBucket: "game-ee829.firebasestorage.app", messagingSenderId: "70259643410", appId: "1:70259643410:web:2539716504e7ba635434cb" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     
     const urlParams = new URLSearchParams(window.location.search);
-    const mode = urlParams.get('mode');
-    const code = urlParams.get('code');
+    let mode = urlParams.get('mode') || 'offline';
+    const inviteCode = urlParams.get('code');
     const myPhone = localStorage.getItem('art_user_phone');
     
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
     
-    let nodes=[], pieces=[], turn=1, myTeam=1, selected=null, validMoves=[], gameId=null, isBot=false, chainPiece=null;
+    let nodes = [], pieces = [], turn = 1, myTeam = 1; 
+    let selected = null, validMoves = [], gameId = null, isBot = false;
+    let chainPiece = null, isGameActive = false;
+
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        createBoard(); 
+        loop(); 
+        
+        if (mode === 'offline') {
+            updateStatusMsg("Playing vs Computer", "#333");
+            isBot = true; isGameActive = true;
+        } else if (mode === 'invite') {
+            if(!inviteCode) { window.location.href='home.html'; return; }
+            joinPrivate(inviteCode);
+        } else {
+            findMatch();
+        }
+    }
 
     function resize() {
         const dpr = window.devicePixelRatio || 1;
@@ -82,115 +145,274 @@
         canvas.height = window.innerHeight * dpr;
         ctx.scale(dpr, dpr);
     }
-    window.addEventListener('resize', resize);
 
-    // --- LOGIC (Simplified from previous response, same core logic) ---
-    function init() {
-        resize(); createBoard();
-        if(mode==='offline') { isBot=true; document.getElementById('status').innerText="VS BOT"; }
-        else if(mode==='invite') { joinPrivate(code); }
-        else findMatch();
-        loop();
+    // --- LOGIC FUNCTIONS (Kept same logic, just updated UI hooks) ---
+    function findMatch() {
+        showModal("Searching", "Looking for a worthy opponent...");
+        db.ref('queue').once('value', snap => {
+            let found = false;
+            snap.forEach(child => {
+                if(!found && child.val().p1 !== myPhone) {
+                    gameId = child.key;
+                    db.ref('queue/'+gameId).remove();
+                    db.ref('games/'+gameId).set({ p1: child.val().p1, p2: myPhone, board: pieces, turn: 1, status: 'active', lastMove: Date.now() });
+                    myTeam = 0; found = true;
+                }
+            });
+            if(!found) {
+                gameId = db.ref('queue').push({ p1: myPhone, time: Date.now() }).key;
+                myTeam = 1;
+                const listener = db.ref('games/'+gameId).on('value', gSnap => {
+                    if(gSnap.exists() && gSnap.val().status === 'active') {
+                        db.ref('games/'+gameId).off('value', listener);
+                        hideModal(); listenGame();
+                    }
+                });
+                setTimeout(() => { 
+                    if(document.getElementById('modal').style.display === 'flex') { 
+                        db.ref('queue/'+gameId).remove(); db.ref('games/'+gameId).off(); 
+                        mode = 'offline'; isBot = true; isGameActive = true; 
+                        hideModal(); updateStatusMsg("Opponent not found. Playing vs Bot.", "#d32f2f");
+                    } 
+                }, 15000);
+            } else { hideModal(); listenGame(); }
+        });
     }
 
+    function joinPrivate(code) {
+        gameId = code;
+        showModal("Connecting", "Joining Room: " + code);
+        db.ref('games/'+gameId).once('value', snap => {
+            const g = snap.val();
+            if(!g) {
+                db.ref('games/'+gameId).set({ p1: myPhone, board: pieces, turn: 1, status: 'waiting' });
+                myTeam = 1;
+                document.getElementById('m-title').innerText = "Waiting for Friend";
+                document.getElementById('m-desc').innerText = "Code: " + code;
+                db.ref('games/'+gameId).on('value', s => { if(s.val() && s.val().status === 'active') { hideModal(); listenGame(); } });
+            } else if (g.status === 'waiting' && g.p1 !== myPhone) {
+                db.ref('games/'+gameId).update({ p2: myPhone, status: 'active' });
+                myTeam = 0; hideModal(); listenGame();
+            } else { alert("Room invalid or full"); window.location.href = 'home.html'; }
+        });
+    }
+
+    function listenGame() {
+        isGameActive = true; updateStatusText();
+        db.ref('games/'+gameId).on('value', snap => {
+            const g = snap.val();
+            if(!g) return;
+            if(g.board) pieces = g.board;
+            turn = g.turn;
+            updateStatusText();
+        });
+    }
+    
+    function syncMove() { if(mode !== 'offline' && gameId) db.ref('games/'+gameId).update({ board: pieces, turn: turn }); }
+
+    // --- BOARD SETUP ---
     function createBoard() {
-        nodes=[]; pieces=[];
-        const w=window.innerWidth, h=window.innerHeight;
-        const size = Math.min(w,h)*0.9;
-        const uX=size/8, uY=size/10, cx=w/2, cy=h/2;
-        let id=0;
-        // ... (Same Board generation as before)
+        nodes = []; pieces = [];
+        const w = window.innerWidth, h = window.innerHeight;
+        const size = Math.min(w, h) * 0.9;
+        const uX = size / 8, uY = size / 10;
+        const cx = w / 2, cy = h / 2;
+        let id = 0;
         for(let r=0; r<9; r++) {
             for(let c=0; c<5; c++) {
                 let v = (r==0&&c==2)||(r==1&&c>=1&&c<=3)||(r>=2&&r<=6)||(r==7&&c>=1&&c<=3)||(r==8&&c==2);
                 if(v) nodes.push({x:cx+(c-2)*uX*1.3, y:cy+(r-4)*uY, r, c, id:id++, n:[]});
             }
         }
-        nodes.forEach(n1=>nodes.forEach(n2=>{
-            if(n1===n2)return;
+        nodes.forEach(n1 => nodes.forEach(n2 => {
+            if(n1===n2) return;
             let dr=Math.abs(n1.r-n2.r), dc=Math.abs(n1.c-n2.c);
             if((dr==1&&dc==0)||(dr==0&&dc==1)||(dr==1&&dc==1)) n1.n.push(n2.id);
         }));
-        nodes.forEach(n=>{
+        nodes.forEach(n => {
             if(n.r<4) pieces.push({id:n.id, t:0, a:1});
             if(n.r>4) pieces.push({id:n.id, t:1, a:1});
         });
     }
 
-    // --- DRAW (PREMIUM) ---
-    function draw() {
-        ctx.clearRect(0,0,canvas.width/window.devicePixelRatio, canvas.height/window.devicePixelRatio);
-        
-        // Glow Connections
-        ctx.shadowBlur = 10; ctx.shadowColor = "#ffd700";
-        ctx.strokeStyle = "rgba(255, 215, 0, 0.2)"; ctx.lineWidth = 4; ctx.lineCap='round';
-        ctx.beginPath();
-        nodes.forEach(n => n.n.forEach(nid => {
-            if(n.id < nid) { let n2=nodes[nid]; ctx.moveTo(n.x,n.y); ctx.lineTo(n2.x,n2.y); }
-        }));
-        ctx.stroke();
-        ctx.shadowBlur=0;
+    // --- INPUT ---
+    canvas.addEventListener('touchstart', e => { handleInput(e.touches[0]); e.preventDefault(); }, {passive:false});
+    canvas.addEventListener('mousedown', handleInput);
+    
+    function handleInput(e) {
+        if(!isGameActive) return;
+        if(mode !== 'offline' && turn !== myTeam) return;
+        if(isBot && turn === 0) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+        let clicked = nodes.find(n => (mx-n.x)**2 + (my-n.y)**2 < 1500);
+        if(!clicked) return;
+        let move = validMoves.find(m => m.to === clicked.id);
+        if(move) { executeMove(selected, move); return; }
+        let p = pieces.find(p => p.id === clicked.id && p.a);
+        if(p && p.t === (mode==='offline' ? turn : myTeam)) {
+             if(chainPiece && p !== chainPiece) return;
+             selected = p; calcMoves(p);
+             if(chainPiece) validMoves = validMoves.filter(m=>m.kill);
+        }
+    }
+    
+    function calcMoves(p) {
+        validMoves = []; let n = nodes[p.id];
+        n.n.forEach(nid => {
+            let occ = pieces.find(x => x.id === nid && x.a);
+            if(!occ) { if(!chainPiece) validMoves.push({to:nid}); } 
+            else if(occ.t !== p.t) {
+                let n2 = nodes[nid];
+                let dr = n2.r - n.r, dc = n2.c - n.c;
+                let n3 = nodes.find(x => x.r === n2.r+dr && x.c === n2.c+dc);
+                if(n3 && !pieces.find(x => x.id === n3.id && x.a) && n2.n.includes(n3.id)) validMoves.push({to:n3.id, kill:occ});
+            }
+        });
+    }
 
-        // Valid Moves
+    function executeMove(p, m) {
+        p.id = m.to;
+        let captured = false;
+        if(m.kill) { m.kill.a = 0; captured = true; }
+        selected = null; validMoves = [];
+        if(captured) {
+            calcMoves(p);
+            if(validMoves.some(x => x.kill)) {
+                chainPiece = p; selected = p;
+                updateStatusMsg("JUMP AGAIN! (Chain Capture)", "#e65100");
+                if(mode !== 'offline') syncMove();
+                if(isBot && turn===0) setTimeout(botMove, 500);
+                return;
+            }
+        }
+        chainPiece = null; turn = 1 - turn; updateStatusText();
+        if(mode !== 'offline') syncMove(); else if(isBot && turn === 0) setTimeout(botMove, 600);
+        checkWin();
+    }
+    
+    function botMove() {
+        let opts = [];
+        pieces.filter(p=>p.t===0 && p.a).forEach(p => {
+            calcMoves(p); validMoves.forEach(m => opts.push({p, m, s: m.kill?10:1}));
+        });
+        if(opts.length) { opts.sort((a,b)=>b.s-a.s); let pick = opts[0]; selected = pick.p; executeMove(pick.p, pick.m); } else { turn = 1; updateStatusText(); }
+    }
+
+    function updateStatusText() {
+        let r = pieces.filter(p=>p.t===0&&p.a).length;
+        let b = pieces.filter(p=>p.t===1&&p.a).length;
+        document.getElementById('s-opp').innerText = r;
+        document.getElementById('s-you').innerText = b;
+        if(!chainPiece) {
+            let isMyTurn = (mode === 'offline' && turn === 1) || (mode !== 'offline' && turn === myTeam);
+            updateStatusMsg(isMyTurn ? "Your Turn" : "Opponent's Turn", isMyTurn ? "#2e7d32" : "#c62828");
+        }
+    }
+
+    function updateStatusMsg(msg, color) {
+        const s = document.getElementById('status');
+        s.innerText = msg;
+        s.style.color = color;
+        s.style.borderColor = color;
+    }
+
+    function checkWin() {
+        let r = pieces.filter(p=>p.t===0&&p.a).length;
+        let b = pieces.filter(p=>p.t===1&&p.a).length;
+        if(r===0 || b===0) {
+            let won = (b>0 && myTeam===1) || (r>0 && myTeam===0);
+            updateStatusMsg(won ? "Victory!" : "Defeat!", won ? "#2e7d32" : "#c62828");
+            isGameActive = false;
+            if(won && mode==='online') db.ref('users/'+myPhone).child('score').transaction(s => (s||0)+10);
+            setTimeout(() => window.location.href = 'home.html', 3000);
+        }
+    }
+    
+    function showModal(t, d) { document.getElementById('modal').style.display='flex'; document.getElementById('m-title').innerText=t; document.getElementById('m-desc').innerText=d; }
+    function hideModal() { document.getElementById('modal').style.display='none'; }
+
+    // --- CLASSIC RENDER ENGINE ---
+    function loop() {
+        requestAnimationFrame(loop);
+        
+        ctx.clearRect(0, 0, canvas.width/window.devicePixelRatio, canvas.height/window.devicePixelRatio);
+        
+        // 1. Draw Lines (Carved Wood Look)
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        nodes.forEach(n => n.n.forEach(nid => {
+            if(n.id < nid) { 
+                let n2 = nodes[nid];
+                // Deep cut shadow
+                ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(n2.x,n2.y);
+                ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.lineWidth = 5; ctx.stroke();
+                
+                // Main dark line
+                ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(n2.x,n2.y);
+                ctx.strokeStyle = "#3e2723"; ctx.lineWidth = 3; ctx.stroke();
+            }
+        }));
+
+        // 2. Draw Valid Move Highlights (Simple Green Rings)
         validMoves.forEach(m => {
             let n = nodes[m.to];
-            ctx.beginPath(); ctx.arc(n.x, n.y, 10, 0, 7);
-            ctx.fillStyle = m.kill ? "#ff3333" : "#00ffcc";
-            ctx.shadowBlur=15; ctx.shadowColor=ctx.fillStyle;
-            ctx.fill(); ctx.shadowBlur=0;
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, 10, 0, Math.PI*2);
+            ctx.fillStyle = m.kill ? "rgba(255, 0, 0, 0.5)" : "rgba(0, 128, 0, 0.5)";
+            ctx.fill();
         });
 
-        // Pieces
+        // 3. Draw Pieces (Realistic Marbles)
         pieces.forEach(p => {
             if(!p.a) return;
             let n = nodes[p.id];
-            let color = p.t===0 ? "#ff3333" : "#3388ff";
             
-            // Selection Glow
-            if(selected===p || chainPiece===p) {
-                ctx.beginPath(); ctx.arc(n.x,n.y,25,0,7);
-                ctx.strokeStyle="#fff"; ctx.lineWidth=2; ctx.stroke();
+            // Draw Selection Ring
+            if(selected === p || chainPiece === p) {
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 25, 0, Math.PI*2);
+                ctx.fillStyle = "rgba(255, 235, 59, 0.5)"; // Yellow glow for selection
+                ctx.fill();
+                ctx.strokeStyle = "#fbc02d";
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
 
-            // 3D Gradient Bead
-            let grad = ctx.createRadialGradient(n.x-5, n.y-5, 2, n.x, n.y, 18);
-            grad.addColorStop(0, "#fff");
-            grad.addColorStop(1, color);
+            // Draw Shadow
+            ctx.beginPath();
+            ctx.arc(n.x + 2, n.y + 4, 18, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            ctx.fill();
+
+            // Draw Marble Body
+            let r = 20;
+            let grad = ctx.createRadialGradient(n.x - 6, n.y - 6, 3, n.x, n.y, r);
             
-            ctx.beginPath(); ctx.arc(n.x,n.y,18,0,7);
+            if(p.t === 0) { // Red Marble
+                grad.addColorStop(0, "#ffcdd2");
+                grad.addColorStop(0.3, "#e53935");
+                grad.addColorStop(1, "#b71c1c");
+            } else { // Blue Marble
+                grad.addColorStop(0, "#bbdefb");
+                grad.addColorStop(0.3, "#1e88e5");
+                grad.addColorStop(1, "#0d47a1");
+            }
+
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, r, 0, Math.PI*2);
             ctx.fillStyle = grad;
-            ctx.shadowBlur=10; ctx.shadowColor=color;
-            ctx.fill(); ctx.shadowBlur=0;
+            ctx.fill();
+            
+            // Shine (Glossy Effect)
+            ctx.beginPath();
+            ctx.ellipse(n.x - 5, n.y - 5, 6, 3, -0.6, 0, Math.PI*2);
+            ctx.fillStyle = "rgba(255,255,255,0.4)";
+            ctx.fill();
         });
     }
 
-    function loop() { requestAnimationFrame(loop); draw(); }
-
-    // --- Input & Matchmaking Hooks (Keep simplified for display) ---
-    // (Ensure you copy the Logic functions from previous response here: findMatch, handleInput, etc.)
-    // I am including essential listeners for UI update:
-    
-    canvas.addEventListener('touchstart', e => { 
-        handleInput(e.touches[0]); e.preventDefault(); 
-    }, {passive:false});
-    
-    // Add logic functions from previous response inside this script tag...
-    // For brevity in design focus, assume logic is merged.
-    
-    // Mock Update for UI design test
-    function updateStatus() {
-        let r=pieces.filter(p=>p.t===0&&p.a).length;
-        let b=pieces.filter(p=>p.t===1&&p.a).length;
-        document.getElementById('s-opp').innerText = r;
-        document.getElementById('s-you').innerText = b;
-        document.getElementById('status').innerText = (turn === myTeam) ? "YOUR TURN" : "OPPONENT TURN";
-        if(chainPiece) document.getElementById('status').innerText = "CHAIN ATTACK!";
-    }
-    
-    // Logic Imports
-    // Copy the `findMatch`, `joinPrivate`, `handleInput`, `executeMove`, `checkWin` from previous response here.
-    // Ensure `draw()` is not duplicated.
-    
     init();
 </script>
 </body>
